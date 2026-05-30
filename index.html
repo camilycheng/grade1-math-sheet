@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一年级口算题生成器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="number"],
+        input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus,
+        input[type="range"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-row .form-group {
+            margin-bottom: 20px;
+        }
+
+        .flex-1 {
+            flex: 1;
+        }
+
+        .flex-2 {
+            flex: 0 0 150px;
+        }
+
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .ratio-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .ratio-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .ratio-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+
+        .ratio-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ratio-item label {
+            flex: 1;
+            margin-bottom: 0;
+            font-size: 14px;
+        }
+
+        .ratio-item input {
+            width: 80px;
+        }
+
+        .total-ratio {
+            text-align: right;
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-bottom: 20px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result {
+            display: none;
+        }
+
+        .result.show {
+            display: block;
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .result-header h3 {
+            color: #333;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            padding: 8px 16px;
+            font-size: 14px;
+            margin-bottom: 0;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-screenshot {
+            background: #28a745;
+        }
+
+        .btn-screenshot:hover {
+            background: #218838;
+        }
+
+        .questions-container {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .questions-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .columns-1 {
+            grid-template-columns: 1fr;
+        }
+
+        .columns-2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .columns-3 {
+            grid-template-columns: repeat(3, 1fr);
+        }
+
+        .columns-4 {
+            grid-template-columns: repeat(4, 1fr);
+        }
+
+        .columns-5 {
+            grid-template-columns: repeat(5, 1fr);
+        }
+
+        .question-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .question-number {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .question-text {
+            flex: 1;
+            font-size: 18px;
+            color: #333;
+            padding-top: 3px;
+        }
+
+        .question-item:hover {
+            background: #e8f0fe;
+            border-color: #667eea;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            button,
+            .btn-group {
+                display: none;
+            }
+            .questions-container {
+                max-height: none;
+                overflow: visible;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📝 一年级口算题生成器</h1>
+
+        <div class="form-row">
+            <div class="form-group flex-1">
+                <label for="questionCount">题目数量</label>
+                <input type="number" id="questionCount" min="1" max="200" value="50">
+            </div>
+            <div class="form-group flex-2">
+                <label for="columnsSelect">列数显示</label>
+                <select id="columnsSelect" onchange="setColumns(this.value)">
+                    <option value="1">1列</option>
+                    <option value="2" selected>2列</option>
+                    <option value="3">3列</option>
+                    <option value="4">4列</option>
+                    <option value="5">5列</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="ratio-section">
+            <h3>题型比例设置（总和必须为1）</h3>
+            <div class="ratio-row">
+                <div class="ratio-item">
+                    <label>不进位加法</label>
+                    <input type="number" id="nonCarryAdd" step="0.05" min="0" max="1" value="0.25">
+                </div>
+                <div class="ratio-item">
+                    <label>进位加法</label>
+                    <input type="number" id="carryAdd" step="0.05" min="0" max="1" value="0.25">
+                </div>
+            </div>
+            <div class="ratio-row">
+                <div class="ratio-item">
+                    <label>不退位减法</label>
+                    <input type="number" id="nonBorrowSub" step="0.05" min="0" max="1" value="0.25">
+                </div>
+                <div class="ratio-item">
+                    <label>退位减法</label>
+                    <input type="number" id="borrowSub" step="0.05" min="0" max="1" value="0.25">
+                </div>
+            </div>
+            <div class="total-ratio" id="totalRatio">总比例: 1.00</div>
+        </div>
+
+        <button onclick="generateQuestions()">生成题目</button>
+
+        <div class="result" id="result">
+            <div class="result-header">
+                <h3>生成的题目</h3>
+                <div class="btn-group">
+                    <button class="btn-secondary" onclick="printQuestions()">打印</button>
+                    <button class="btn-secondary" onclick="copyQuestions()">复制</button>
+                    <button class="btn-secondary btn-screenshot" onclick="captureQuestions()">📷 截图保存</button>
+                </div>
+            </div>
+            <div class="questions-container" id="questionsContainer">
+                <div class="questions-grid" id="questionsGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentColumns = 2;
+
+        function setColumns(columns) {
+            currentColumns = parseInt(columns);
+            const grid = document.getElementById('questionsGrid');
+            if (grid) {
+                grid.className = `questions-grid columns-${currentColumns}`;
+            }
+        }
+
+        function updateTotalRatio() {
+            const nc = parseFloat(document.getElementById('nonCarryAdd').value) || 0;
+            const c = parseFloat(document.getElementById('carryAdd').value) || 0;
+            const nb = parseFloat(document.getElementById('nonBorrowSub').value) || 0;
+            const b = parseFloat(document.getElementById('borrowSub').value) || 0;
+            const total = nc + c + nb + b;
+            document.getElementById('totalRatio').textContent = `总比例: ${total.toFixed(2)}`;
+        }
+
+        document.getElementById('nonCarryAdd').addEventListener('input', updateTotalRatio);
+        document.getElementById('carryAdd').addEventListener('input', updateTotalRatio);
+        document.getElementById('nonBorrowSub').addEventListener('input', updateTotalRatio);
+        document.getElementById('borrowSub').addEventListener('input', updateTotalRatio);
+
+        function generateNonCarryAddition() {
+            const a = Math.floor(Math.random() * 9) + 1;
+            const maxB = 10 - a;
+            const b = maxB >= 1 ? Math.floor(Math.random() * maxB) + 1 : 1;
+            return `${a} + ${b} =`;
+        }
+
+        function generateCarryAddition() {
+            let a, b;
+            do {
+                a = Math.floor(Math.random() * 99) + 1;
+                b = Math.floor(Math.random() * (100 - a)) + 1;
+            } while (a + b <= 10);
+            return `${a} + ${b} =`;
+        }
+
+        function generateNonBorrowSubtraction() {
+            const tens1 = Math.floor(Math.random() * 9) + 1;
+            const ones1 = Math.floor(Math.random() * 10);
+            const tens2 = Math.floor(Math.random() * (tens1 + 1));
+            let ones2;
+            if (tens2 === tens1) {
+                ones2 = Math.floor(Math.random() * (ones1 + 1));
+            } else {
+                ones2 = Math.floor(Math.random() * 10);
+            }
+            const a = tens1 * 10 + ones1;
+            let b = tens2 * 10 + ones2;
+            if (b === 0) {
+                b = Math.floor(Math.random() * a) + 1;
+            }
+            return `${a} - ${b} =`;
+        }
+
+        function generateBorrowSubtraction() {
+            while (true) {
+                const a = Math.floor(Math.random() * 90) + 10;
+                const b = Math.floor(Math.random() * (a - 1)) + 1;
+                const aOnes = a % 10;
+                const bOnes = b % 10;
+                if (aOnes < bOnes) {
+                    return `${a} - ${b} =`;
+                }
+            }
+        }
+
+        function generateQuestions() {
+            const total = parseInt(document.getElementById('questionCount').value) || 50;
+            const ncRatio = parseFloat(document.getElementById('nonCarryAdd').value) || 0;
+            const cRatio = parseFloat(document.getElementById('carryAdd').value) || 0;
+            const nbRatio = parseFloat(document.getElementById('nonBorrowSub').value) || 0;
+            const bRatio = parseFloat(document.getElementById('borrowSub').value) || 0;
+
+            const totalRatio = ncRatio + cRatio + nbRatio + bRatio;
+            if (Math.abs(totalRatio - 1) > 0.001) {
+                alert('错误：四种题型的比例之和必须等于1');
+                return;
+            }
+
+            const ncCount = Math.round(total * ncRatio);
+            const cCount = Math.round(total * cRatio);
+            const nbCount = Math.round(total * nbRatio);
+            const bCount = total - ncCount - cCount - nbCount;
+
+            const questions = [];
+
+            for (let i = 0; i < ncCount; i++) {
+                questions.push(generateNonCarryAddition());
+            }
+            for (let i = 0; i < cCount; i++) {
+                questions.push(generateCarryAddition());
+            }
+            for (let i = 0; i < nbCount; i++) {
+                questions.push(generateNonBorrowSubtraction());
+            }
+            for (let i = 0; i < bCount; i++) {
+                questions.push(generateBorrowSubtraction());
+            }
+
+            for (let i = questions.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questions[i], questions[j]] = [questions[j], questions[i]];
+            }
+
+            const grid = document.getElementById('questionsGrid');
+            grid.className = `questions-grid columns-${currentColumns}`;
+            grid.innerHTML = '';
+
+            questions.forEach((q, index) => {
+                const item = document.createElement('div');
+                item.className = 'question-item';
+                
+                const numberSpan = document.createElement('span');
+                numberSpan.className = 'question-number';
+                numberSpan.textContent = index + 1;
+                
+                const textSpan = document.createElement('span');
+                textSpan.className = 'question-text';
+                textSpan.textContent = q;
+                
+                item.appendChild(numberSpan);
+                item.appendChild(textSpan);
+                grid.appendChild(item);
+            });
+
+            document.getElementById('result').classList.add('show');
+        }
+
+        function printQuestions() {
+            window.print();
+        }
+
+        function copyQuestions() {
+            const items = document.querySelectorAll('.question-item');
+            const text = Array.from(items).map((item, index) => {
+                const num = index + 1;
+                const q = item.querySelector('.question-text').textContent;
+                return `${num}. ${q}`;
+            }).join('\n');
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('题目已复制到剪贴板！');
+            }).catch(err => {
+                console.error('复制失败:', err);
+            });
+        }
+
+        function captureQuestions() {
+            const container = document.getElementById('questionsContainer');
+            
+            html2canvas(container, {
+                backgroundColor: '#f8f9fa',
+                scale: 2,
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `口算题_${new Date().toLocaleDateString()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            }).catch(err => {
+                console.error('截图失败:', err);
+                alert('截图失败，请重试');
+            });
+        }
+    </script>
+</body>
+</html>
