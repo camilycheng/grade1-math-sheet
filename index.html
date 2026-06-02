@@ -72,10 +72,14 @@
         }
 
         .flex-1 {
-            flex: 1;
+            flex: 0 0 150px;
         }
 
         .flex-2 {
+            flex: 0 0 130px;
+        }
+
+        .flex-3 {
             flex: 0 0 150px;
         }
 
@@ -237,33 +241,33 @@
 
         .question-item {
             background: white;
-            padding: 15px;
+            padding: 4px 8px;
             border-radius: 8px;
             display: flex;
-            align-items: flex-start;
-            gap: 10px;
+            align-items: center;
+            gap: 4px;
             border: 1px solid #e9ecef;
         }
 
         .question-number {
             flex-shrink: 0;
-            width: 28px;
-            height: 28px;
+            width: 16px;
+            height: 16px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
+            font-size: 9px;
             font-weight: bold;
         }
 
         .question-text {
             flex: 1;
-            font-size: 18px;
+            font-size: 16px;
             color: #333;
-            padding-top: 3px;
+            padding-top: 2px;
         }
 
         .question-item:hover {
@@ -279,6 +283,7 @@
                 box-shadow: none;
                 padding: 0;
             }
+            .settings,
             button,
             .btn-group {
                 display: none;
@@ -287,11 +292,15 @@
                 max-height: none;
                 overflow: visible;
             }
+            .result-header h3 {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="settings">
         <h1>📝 一年级口算题生成器</h1>
 
         <div class="form-row">
@@ -308,6 +317,10 @@
                     <option value="4">4列</option>
                     <option value="5">5列</option>
                 </select>
+            </div>
+            <div class="form-group flex-3">
+                <label for="lineSpacing">行间距(px)</label>
+                <input type="number" id="lineSpacing" min="1" max="50" value="1">
             </div>
         </div>
 
@@ -336,6 +349,7 @@
             <div class="total-ratio" id="totalRatio">总比例: 1.00</div>
         </div>
 
+        </div>
         <button onclick="generateQuestions()">生成题目</button>
 
         <div class="result" id="result">
@@ -464,6 +478,8 @@
 
             const grid = document.getElementById('questionsGrid');
             grid.className = `questions-grid columns-${currentColumns}`;
+            const lineSpacing = parseInt(document.getElementById('lineSpacing').value) || 15;
+            grid.style.gap = `${lineSpacing}px`;
             grid.innerHTML = '';
 
             questions.forEach((q, index) => {
