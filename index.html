@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>一年级口算题生成器</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * {
             margin: 0;
@@ -208,6 +209,14 @@
             background: #218838;
         }
 
+        .btn-pdf {
+            background: #dc3545;
+        }
+
+        .btn-pdf:hover {
+            background: #c82333;
+        }
+
         .questions-container {
             background: #f8f9fa;
             padding: 20px;
@@ -359,6 +368,7 @@
                     <button class="btn-secondary" onclick="printQuestions()">打印</button>
                     <button class="btn-secondary" onclick="copyQuestions()">复制</button>
                     <button class="btn-secondary btn-screenshot" onclick="captureQuestions()">📷 截图保存</button>
+                    <button class="btn-secondary btn-pdf" onclick="saveToPDF()">📄 保存PDF</button>
                 </div>
             </div>
             <div class="questions-container" id="questionsContainer">
@@ -536,6 +546,37 @@
             }).catch(err => {
                 console.error('截图失败:', err);
                 alert('截图失败，请重试');
+            });
+        }
+
+        function saveToPDF() {
+            const container = document.getElementById('questionsContainer');
+            const originalOverflow = container.style.overflow;
+            container.style.overflow = 'visible';
+            
+            const opt = {
+                margin: 15,
+                filename: `口算题_${new Date().toLocaleDateString()}.pdf`,
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { 
+                    scale: 2, 
+                    useCORS: true,
+                    logging: false,
+                    scrollX: 0,
+                    scrollY: 0,
+                    windowWidth: document.documentElement.offsetWidth,
+                    windowHeight: document.documentElement.offsetHeight,
+                    backgroundColor: '#f8f9fa'
+                },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            
+            html2pdf().set(opt).from(container).save().then(() => {
+                container.style.overflow = originalOverflow;
+            }).catch(err => {
+                container.style.overflow = originalOverflow;
+                console.error('PDF保存失败:', err);
+                alert('PDF保存失败，请重试');
             });
         }
     </script>
